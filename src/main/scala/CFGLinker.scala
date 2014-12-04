@@ -8,9 +8,9 @@ import de.fosd.typechef.typesystem.linker.SystemLinker
 /**
  * currently here to avoid complication with rebuilding all ivy/maven packages
  *
- * run in busybox directory
+ * run in directory of the casestudy
  */
-object BusyboxCFGLinker extends App {
+object CFGLinker extends App {
 
     import FeatureExprFactory._
 
@@ -20,7 +20,7 @@ object BusyboxCFGLinker extends App {
     val filelistFile = new File("filelist")
 
     if (!filelistFile.exists) {
-        System.out.print("start this in the TypeChef-BusyboxAnalysis/gitbusybox directory containing the analysis results")
+        System.out.print("start this in the casestudy directory containing the analysis results")
     } else {
 
         //        all(filelistFile, true)(getReach)

@@ -74,12 +74,12 @@ case class CFG(val nodes: Set[CFGNode], val edges: Set[(CFGNode, CFGNode, Featur
     def writeDot(writer: Writer) {
         writer.write("digraph \"\" {\nnode [shape=record];\n")
         for (n <- nodes)
-            writer.write( """"%d"[label="{{%s}|%s}", color="%s", fontname="Calibri", style="filled", fillcolor="white"];""".format(n.id, esc(n.name), /*esc(n.fexpr.toString)*/ "1",
+            writer.write( """"%d"[label="{{%s}|%s}", color="%s", fontname="Calibri", style="filled", fillcolor="white"];""".format(n.id, esc(n.name), esc(n.fexpr.toString) /*"1"*/,
                 if (n.kind == "function") "blue" else "black"
             ) + "\n")
 
         for (e <- edges)
-            writer.write( """"%d" -> "%d"[label="%s"];""".format(e._1.id, e._2.id, /*esc(e._3.toString())*/ "1") + "\n")
+            writer.write( """"%d" -> "%d"[label="%s"];""".format(e._1.id, e._2.id, esc(e._3.toString()) /*"1"*/) + "\n")
         writer.write("}")
     }
 
