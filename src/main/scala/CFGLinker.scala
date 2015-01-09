@@ -18,6 +18,7 @@ object CFGLinker extends App {
     val r = new ReduceCFG()
 
     val filelistFile = new File("filelist")
+    val projectName = filelistFile.getAbsoluteFile().getParentFile().getName()
 
     if (!filelistFile.exists) {
         System.out.print("start this in the casestudy directory containing the analysis results")
@@ -39,11 +40,14 @@ object CFGLinker extends App {
         // compose .rcfg files
         val abigCFG = linkSysLibs(composeRCFG(filelistFile))
         assert(abigCFG.checkConsistency)
-        writeCFG(abigCFG, "busybox.rcfg")
+        writeCFG(abigCFG, projectName + ".rcfg")
+        writeDots(projectName, abigCFG)
 
         // remove inline functions from busybox.rcfg
-        val rcfg = loadCFG("busybox.rcfg")
-        writeCFG(removeInlineFunctions(rcfg), "busybox-noinline.rcfg")
+        val rcfg = loadCFG(projectName + ".rcfg")
+	val rcfgNoinline = removeInlineFunctions(rcfg)
+        writeCFG(rcfgNoinline, projectName + "-noinline.rcfg")
+	writeDots(projectName + "-noinline", rcfgNoinline)
     }
 
 
@@ -139,8 +143,8 @@ object CFGLinker extends App {
             val filePC = if (pcFile.exists()) new FeatureExprParser().parseFile(new FileInputStream(pcFile)) else True
             val cfg = new CFGLoader().loadFileCFG(new File(cfgFile), filePC)
             println(".")
-            val newcfg = r.removeSelfCycles(r.reduceMut(cfg, true, compressRate = 5))
-            println("")
+            val newcfg = r.removeSelfCycles(r.reduceMut(cfg, progressOutput = false, compressRate = 5))
+//            println("")
 
             val writer = new FileWriter(file + ".rcfg")
             newcfg.write(writer)
@@ -204,7 +208,7 @@ object CFGLinker extends App {
     }
 
     def writeDots(file: String, cfg: CFG) {
-        println("writing dot")
+        println("writing dot " + file + ".rcfg.dot")
 
         val writer = new FileWriter(file + ".rcfg.dot")
         cfg.writeDot(writer)
@@ -212,7 +216,7 @@ object CFGLinker extends App {
     }
 
     def removeInlineFunctions(cfg: CFG): CFG =
-        r.reduceMut(cfg, progressOutput = true, nodeFilter = {
+        r.reduceMut(cfg, progressOutput = false, nodeFilter = {
             n => n.kind == "function-inline"
         })
 
