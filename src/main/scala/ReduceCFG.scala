@@ -81,6 +81,8 @@ class ReduceCFG {
 
         }
 
+        
+        edges = new mutable.ArrayBuffer() ++ (compressRedundantEdges(new CFG(cfg.nodes, Set() ++ edges)).edges)
         new CFG(Set() ++ nodes, Set() ++ edges)
     }
 
