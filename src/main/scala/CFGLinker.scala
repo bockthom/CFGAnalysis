@@ -33,21 +33,23 @@ object CFGLinker extends App {
 
 
         //create .rcfg files
-                reduceFileCFGs(filelistFile)
-                allF(filelistFile, true)(writeDots)
+//                reduceFileCFGs(filelistFile)
+//                allF(filelistFile, true)(writeDots)
 
 
         // compose .rcfg files
-        val abigCFG = linkSysLibs(composeRCFG(filelistFile))
+        System.out.println("start linking...")
+        val abigCFG = linkSysLibs(composeCFG(filelistFile))
+        System.out.println("finished linking...")
         assert(abigCFG.checkConsistency)
-        writeCFG(abigCFG, projectName + ".rcfg")
+        writeCFG(abigCFG, projectName + ".rcg")
         writeDots(projectName, abigCFG)
 
         // remove inline functions from busybox.rcfg
-        val rcfg = loadCFG(projectName + ".rcfg")
-	val rcfgNoinline = removeInlineFunctions(rcfg)
-        writeCFG(rcfgNoinline, projectName + "-noinline.rcfg")
-	writeDots(projectName + "-noinline", rcfgNoinline)
+        //val rcfg = loadCFG(projectName + ".rcfg")
+        //val rcfgNoinline = removeInlineFunctions(rcfg)
+        //writeCFG(rcfgNoinline, projectName + "-noinline.rcfg")
+        //writeDots(projectName + "-noinline", rcfgNoinline)
     }
 
 
@@ -56,7 +58,7 @@ object CFGLinker extends App {
         var bigCFG = new CFG(Set(), Set())
 
         for (file <- Source.fromFile(filelistFile).getLines()) {
-            val cfgFile = file + ".cfg"
+            val cfgFile = file + ".cg"
             print("linking " + cfgFile)
 
             val pcFile = new File(file + ".pc")
@@ -136,7 +138,7 @@ object CFGLinker extends App {
     def reduceFileCFGs(filelistFile: File) {
         for (file <- Source.fromFile(filelistFile).getLines()) {
 
-            val cfgFile = file + ".cfg"
+            val cfgFile = file + ".cg"
             print("reducing " + cfgFile)
 
             val pcFile = new File(file + ".pc")
@@ -153,7 +155,7 @@ object CFGLinker extends App {
     }
 
 
-    def writeCFG(cfg: CFG, filename: String = "busybox.cfg") {
+    def writeCFG(cfg: CFG, filename: String = "busybox.cg") {
         println("writing result")
 
         val writer = new FileWriter(filename)
@@ -161,7 +163,7 @@ object CFGLinker extends App {
         writer.close()
     }
 
-    def loadCFG(filename: String = "busybox.cfg"): CFG = {
+    def loadCFG(filename: String = "busybox.cg"): CFG = {
         println("loading")
         new CFGLoader().loadCFG(new File(filename))
     }
@@ -172,7 +174,7 @@ object CFGLinker extends App {
         println("reducing")
         val newcfg = r.removeSelfCycles(r.reduceMut(cfg))
         println("\nwriting")
-        val w = new FileWriter("busybox_reduced.cfg")
+        val w = new FileWriter("busybox_reduced.cg")
         newcfg.write(w)
         w.close
     }
@@ -185,7 +187,7 @@ object CFGLinker extends App {
         for (file <- Source.fromFile(filelistFile).getLines())
             f(file, if (reduced) new CFGLoader().loadCFG(new File(file + ".rcfg"))
             else {
-                val cfgFile = file + ".cfg"
+                val cfgFile = file + ".cg"
                 val pcFile = new File(file + ".pc")
                 val filePC = if (pcFile.exists()) new FeatureExprParser().parseFile(new FileInputStream(pcFile)) else True
                 new CFGLoader().loadFileCFG(new File(cfgFile), filePC)
