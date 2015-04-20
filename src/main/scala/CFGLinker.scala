@@ -210,9 +210,9 @@ object CFGLinker extends App {
     }
 
     def writeDots(file: String, cfg: CFG) {
-        println("writing dot " + file + ".rcfg.dot")
+        println("writing dot " + file + ".rcg.dot")
 
-        val writer = new FileWriter(file + ".rcfg.dot")
+        val writer = new FileWriter(file + ".rcg.dot")
         cfg.writeDot(writer)
         writer.close()
     }
