@@ -119,7 +119,7 @@ class CFGLoader {
             (fields(1).toInt, new CFGNode(IdGen.genId(), fields(2), new File(fields(3)), fields(4).toInt, fields(5), parseFExpr(fields(6)) and filePC))
     }
 
-    private def parseFExpr(s: String): FeatureExpr = featureExprParser.parse(s)
+    private def parseFExpr(s: String): FeatureExpr = featureExprParser.parse(s.replaceAll("""True""", "1").replaceAll("""False""", "0"))
 
     def loadEdge(s: String): (Int, Int, FeatureExpr) = {
         val fields = s.split(";")
