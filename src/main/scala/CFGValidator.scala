@@ -1,34 +1,37 @@
-import java.io.{File, FileWriter}
+package de.fosd.typechef.cfganalysis
 
-import de.fosd.typechef.cfganalysis.{CFGLoader, CFG}
-import de.fosd.typechef.featureexpr.FeatureExprParser
-import de.fosd.typechef.lexer.FeatureExprLib
+import de.fosd.typechef.options.{FrontendOptionsWithConfigFiles, FrontendOptions, OptionException}
 
-object CFGValidator extends App {
+class CFGValidator { 
 
-  if (args.length < 3) {
-    println("Usage: % CFGValidator <cfg> <fm> <out>")
-  } else {
+    def validate(args: Array[String], cfg : CFG): CFG = {
 
-    val cfgFile = args(0)
-    val fmFile = args(1)
-    val outpath = args(2)
+        // load options
+        val opt = new FrontendOptionsWithConfigFiles()
+        try {
+		try {
+			opt.parseOptions(args)
+		} catch {
+			case o: OptionException => if (!opt.isPrintVersion) throw o
+		}
+   	}
+   	catch {
+		case o: OptionException =>
+		println("Invocation error: " + o.getMessage)
+		println("use parameter --help for more information.")
+		return cfg
+    	}
 
-    val cfg = new CFGLoader().loadFileCFG(new File(cfgFile))
+	// get feature model
+    	val fm = opt.getFullFeatureModel
 
-    // TODO what about .dimacs feature models?
-    val parsedFmFile = new FeatureExprParser().parseFile(fmFile)
-    val fm = FeatureExprLib.featureModelFactory().create(parsedFmFile)
+	// validate against the feature model
+    	val satNodes = cfg.nodes.filter(_.fexpr.isSatisfiable(fm))
+    	println("Nodes (sat/unsat): " + satNodes.size + " vs. " + cfg.nodes.size)
 
-    val satNodes = cfg.nodes.filter(_.fexpr.isSatisfiable(fm))
-    println("Nodes (sat/unsat): " + satNodes.size + " vs. " + cfg.nodes.size)
+    	val satEdges = cfg.edges.filter(_._3.isSatisfiable(fm))
+   	println("Edges (sat/unsat): " + satEdges.size + " vs. " + cfg.edges.size)
 
-    val satEdges = cfg.edges.filter(_._3.isSatisfiable(fm))
-    println("Edges (sat/unsat): " + satEdges.size + " vs. " + cfg.edges.size)
-
-    val writer = new FileWriter(outpath)
-
-    new CFG(satNodes,satEdges).write(writer)
-
-  }
+	return (new CFG(satNodes,satEdges))
+    }
 }

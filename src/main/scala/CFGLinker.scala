@@ -16,6 +16,7 @@ object CFGLinker extends App {
 
     FeatureExprFactory.setDefault(FeatureExprFactory.bdd)
     val r = new ReduceCFG()
+    val v = new CFGValidator()
 
     val filelistFile = new File("filelist")
     val projectName = filelistFile.getAbsoluteFile().getParentFile().getName()
@@ -42,8 +43,14 @@ object CFGLinker extends App {
         val abigCFG = linkSysLibs(composeCFG(filelistFile))
         System.out.println("finished linking...")
         assert(abigCFG.checkConsistency)
-        writeCFG(abigCFG, projectName + ".rcg")
-        writeDots(projectName, abigCFG)
+
+	// remove invalid nodes and invalid edges (using a given featuremodel)
+	System.out.println("validate...")
+	val validatedCFG = v.validate(args, abigCFG)
+
+        writeCFG(validatedCFG, projectName + ".rcg")
+        writeDots(projectName, validatedCFG)
+
 
         // remove inline functions from busybox.rcfg
         //val rcfg = loadCFG(projectName + ".rcfg")
