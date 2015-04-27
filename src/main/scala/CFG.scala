@@ -35,7 +35,7 @@ case class CFG(val nodes: Set[CFGNode], val edges: Set[(CFGNode, CFGNode, Featur
 
         val newThisEdges: Set[(CFGNode, CFGNode, FeatureExpr)] = this.edges.flatMap(
             e => if (thisReplacements.contains(e._2))
-                thisReplacements(e._2).map(newTarget => (e._1, newTarget, e._3 /*and newTarget.fexpr*/)) /*+ ((e._1, e._2, thisReplacements(e._2).foldLeft(e._3)(_ andNot _.fexpr)))*/
+                thisReplacements(e._2).map(newTarget => (e._1, newTarget, e._3 and newTarget.fexpr)) + ((e._1, e._2, thisReplacements(e._2).foldLeft(e._3)(_ andNot _.fexpr)))
             else Set(e)
 
         )
@@ -54,12 +54,13 @@ case class CFG(val nodes: Set[CFGNode], val edges: Set[(CFGNode, CFGNode, Featur
 
         val newThatEdges = that.edges.flatMap(
             e => if (thatReplacements.contains(e._2))
-                thatReplacements(e._2).map(newTarget => (e._1, newTarget, e._3 /*and newTarget.fexpr*/)) /*+ ((e._1, e._2, thatReplacements(e._2).foldLeft(e._3)(_ andNot _.fexpr)))*/
+                thatReplacements(e._2).map(newTarget => (e._1, newTarget, e._3 and newTarget.fexpr)) + ((e._1, e._2, thatReplacements(e._2).foldLeft(e._3)(_ andNot _.fexpr)))
             else Set(e)
         )
 
 
-        new CFG((this.nodes ++ that.nodes -- nodesToRemove).filter(_.fexpr.isSatisfiable()), (newThisEdges ++ newThatEdges).filter(_._3.isSatisfiable()))
+        new CFG((this.nodes ++ that.nodes /*--  nodesToRemove [not consistent, would also remove not-already-linked declarations!]*/)
+          .filter(_.fexpr.isSatisfiable()), (newThisEdges ++ newThatEdges).filter(_._3.isSatisfiable()))
     }
 
     def write(writer: Writer) {
