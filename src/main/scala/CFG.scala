@@ -5,7 +5,7 @@ import java.io.{Writer, FileReader, BufferedReader, File}
 import FeatureExprFactory._
 
 
-class CFGNode(val id: Int, val kind: String, file: File, line: Int, val name: String, val fexpr: FeatureExpr) {
+class CFGNode(val id: Int, val kind: String, val file: File, line: Int, val name: String, val fexpr: FeatureExpr) {
     def write(writer: Writer) {
         writer.write("N;" + id + ";" + kind + ";" + (if (file != null) file.getPath else "null") + ";" + line + ";" + name + ";")
         fexpr.print(writer)
@@ -75,8 +75,9 @@ case class CFG(val nodes: Set[CFGNode], val edges: Set[(CFGNode, CFGNode, Featur
     def writeDot(writer: Writer) {
         writer.write("digraph \"\" {\nnode [shape=record];\n")
         for (n <- nodes)
-            writer.write( """"%d"[label="{{%s}|%s}", color="%s", fontname="Calibri", style="filled", fillcolor="white"];""".format(n.id, esc(n.name), esc(n.fexpr.toString) /*"1"*/,
-                if (n.kind == "function") "blue" else "black"
+          writer.write( """"%d"[label="{{%s::%s}|%s}", color="%s", fontname="Calibri", style="filled", fillcolor="white"];"""
+            .format(n.id, esc(n.file.toString), esc(n.name), esc(n.fexpr.toString()) /*"1"*/ ,
+              if (n.file.toString equals "sys-unknown") "red" else if (n.kind == "function") "blue" else "black"
             ) + "\n")
 
         for (e <- edges)
