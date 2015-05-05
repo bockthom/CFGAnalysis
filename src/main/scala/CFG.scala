@@ -144,8 +144,14 @@ class CFGLoader {
         var line = reader.readLine()
         while (line != null) {
             if (line.charAt(0) == 'N') {
-                val node = loadNode(line, cfgFile, filePC, isRawFormat)
-                nodes = nodes + node
+                val cfgNode@(id, _) = loadNode(line, cfgFile, filePC, isRawFormat)
+
+                // only add a node,
+                // - if it was not already added OR
+                // - if it was added before, but not as a function implementation (override it!)
+                if (!nodes.contains(id) || !(nodes.get(id).get.kind startsWith "function"))
+                    nodes = nodes + cfgNode
+
             }
             if (line.charAt(0) == 'E') {
                 val (srcId, targetId, fexpr) = loadEdge(line)
