@@ -1,0 +1,4 @@
+N;111;function;-1;foo;1
+N;111;declaration;-1;foo;1
+N;222;function;-1;bar;1
+E;111;222;1
