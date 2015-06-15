@@ -2,7 +2,7 @@ package de.fosd.typechef.cfganalysis
 
 import io.Source
 import java.io.{FileInputStream, FileWriter, File}
-import de.fosd.typechef.featureexpr.{FeatureExprParser, FeatureExprFactory}
+import de.fosd.typechef.featureexpr.{FeatureExprParser, FeatureExprFactory, FeatureExpr}
 import de.fosd.typechef.typesystem.linker.SystemLinker
 
 /**
@@ -50,7 +50,12 @@ object CFGLinker extends App {
 
         writeCFG(validatedCFG, projectName + ".rcg")
         writeDots(projectName, validatedCFG)
-
+	
+	// write edges and nodes of validatedCFG into two separate files
+	val validatedCFGNodesOnly = new CFG(validatedCFG.nodes, Set[(CFGNode, CFGNode, FeatureExpr)]());
+	val validatedCFGEdgesOnly = new CFG(Set[CFGNode](),validatedCFG.edges);
+	writeCFG(validatedCFGNodesOnly, projectName + ".rcg.intros")
+        writeCFG(validatedCFGEdgesOnly, projectName + ".rcg.refs")
 
         // remove inline functions from busybox.rcfg
         //val rcfg = loadCFG(projectName + ".rcfg")
