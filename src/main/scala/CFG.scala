@@ -114,9 +114,20 @@ class CFGLoader {
 
 
     def loadNode(s: String, file: File, filePC: FeatureExpr, isRawFormat: Boolean): (Int, CFGNode) = {
-        val fields = s.split(";")
-        if (isRawFormat)
-            (fields(1).toInt, new CFGNode(IdGen.genId(), fields(2), file, fields(3).toInt, fields(4), parseFExpr(fields(5)) and filePC))
+	val fields = s.split(";")
+        if (isRawFormat) {
+            //(fields(1).toInt, new CFGNode(IdGen.genId(), fields(2), file, fields(3).toInt, fields(4), parseFExpr(fields(5)) and filePC))
+
+	    // modifications for KEBA
+            val path = fields(4).split("::")
+            val expr = fields(5).replaceAll("IS_LINKED[(](\\(\\(\\B\\)\\))*?", "\\(")
+
+            if (path.length == 2)
+                (fields(1).toInt, new CFGNode(IdGen.genId(), fields(2), new File(path(1))/*file*/, fields(3).toInt, path(0)/*fields(4)*/, parseFExpr(expr/*fields(5)*/) and filePC))
+            else
+                (fields(1).toInt, new CFGNode(IdGen.genId(), fields(2), new File(path(0))/*file*/, fields(3).toInt, path(0)/*fields(4)*/, parseFExpr(expr/*fields(5)*/) and filePC))
+	    // end of modifications for KEBA
+        }
         else
             (fields(1).toInt, new CFGNode(IdGen.genId(), fields(2), new File(fields(3)), fields(4).toInt, fields(5), parseFExpr(fields(6)) and filePC))
     }
@@ -125,7 +136,12 @@ class CFGLoader {
 
     def loadEdge(s: String): (Int, Int, FeatureExpr) = {
         val fields = s.split(";")
-        (fields(1).toInt, fields(2).toInt, parseFExpr(fields(3)))
+	//(fields(1).toInt, fields(2).toInt, parseFExpr(fields(3)))
+
+	// modifications for KEBA
+	val expr = fields(3).replaceAll("IS_LINKED[(](\\(\\(\\B\\)\\))*?", "\\(")
+        (fields(1).toInt, fields(2).toInt, parseFExpr(expr/*fields(3)*/))
+	// end of modifications for KEBA
     }
 
     //load a CFG file for one file

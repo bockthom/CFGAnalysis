@@ -19,7 +19,7 @@ object CFGLinker extends App {
     val v = new CFGValidator()
 
     val filelistFile = new File("filelist")
-    val projectName = filelistFile.getAbsoluteFile().getParentFile().getName()
+    val projectName = filelistFile.getAbsoluteFile().getParentFile().getParentFile().getName()
 
     if (!filelistFile.exists) {
         System.out.print("start this in the casestudy directory containing the analysis results")
@@ -34,8 +34,8 @@ object CFGLinker extends App {
 
 
         //create .rcfg files
-//                reduceFileCFGs(filelistFile)
-//                allF(filelistFile, true)(writeDots)
+                reduceFileCFGs(filelistFile)
+                allF(filelistFile, true)(writeDots)
 
 
         // compose .rcfg files
